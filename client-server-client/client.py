@@ -4,19 +4,15 @@ import json
 HOST = "127.0.0.1"
 PORT = 5000
 
-def send_data(data):
-    s.connect((HOST, PORT))
-    s.sendall(data)
-    print("All packets sent successfully")
-
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((HOST, PORT))
     username = input("What is your username? ")
-    task = None
-    while not task:
+    running = True
+    while running:
         data = {}
-        data["username"] = username
-        task = input("Would you like to view your inbox (vi), or send a message (sm): ")
+        task = input("Would you like to view your inbox (vi), or send a message (sm), or disconnect (dc): ")
         data["task"] = task
+        data["username"] = username
         if task == "vi":
             pass
         elif task == "sm":
@@ -24,10 +20,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             message = input("What is the message? ")
             data["to_user"] = to_user
             data["message"] = message
+        elif task == "dc":
+            running = False
+            continue
         else:
             print("task invalid")
-            task = None
             continue
-
-        json_data = json.dumps(data).encode()
-        send_data(json_data)
+        
+        json_data = json.dumps(data)
+        s.sendall(json_data.encode())
