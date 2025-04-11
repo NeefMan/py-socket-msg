@@ -1,17 +1,25 @@
 import socket
 import threading
+from collections import defaultdict
+import json
 
 HOST = "127.0.0.1"
 PORT = 5000
 
+inbox = defaultdict(list) # {"username": [(message, from_user)]}
+
+def recieve_data(conn):
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break
+        return data.decode()
+
 def handle_connection(conn, addr):
     with conn:
         print(f"Connected with {addr}")
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            print(data.decode())
+        data = json.loads(recieve_data(conn))
+        print(data)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
