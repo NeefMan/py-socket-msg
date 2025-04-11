@@ -3,6 +3,7 @@ import json
 
 HOST = "127.0.0.1"
 PORT = 5000
+END_DELIMETER = "*&^%"
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
@@ -22,10 +23,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             data["message"] = message
         elif task == "dc":
             running = False
-            continue
         else:
             print("task invalid")
             continue
         
         json_data = json.dumps(data)
+        json_data += END_DELIMETER
         s.sendall(json_data.encode())
