@@ -5,6 +5,20 @@ HOST = "127.0.0.1"
 PORT = 5000
 END_DELIMETER = "*&^%"
 
+def recieve_data(conn):
+    full_packet = ""
+    while True:
+        packet = conn.recv(1024).decode()
+        full_packet += packet
+        if full_packet[len(full_packet)-len(END_DELIMETER):] == END_DELIMETER:
+            break
+    return full_packet[:len(full_packet)-len(END_DELIMETER)]
+
+def send_data_to_host(conn, data):
+    json_data = json.dumps(data)
+    json_data += END_DELIMETER
+    conn.sendall(json_data.encode())
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
     username = input("What is your username? ")
@@ -15,7 +29,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         data["task"] = task
         data["username"] = username
         if task == "vi":
-            pass
+            send_data_to_host(s, data)
+            inbox = json.loads(recieve_data(s))
+            print(inbox)
+            continue
         elif task == "sm":
             to_user = input("Who do you want to send a message to? ")
             message = input("What is the message? ")
@@ -26,7 +43,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         else:
             print("task invalid")
             continue
-        
-        json_data = json.dumps(data)
-        json_data += END_DELIMETER
-        s.sendall(json_data.encode())
+
+        send_data_to_host(s, data)
